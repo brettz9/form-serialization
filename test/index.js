@@ -501,7 +501,7 @@ test('bracket notation - bad notation', function() {
 });
 
 test('custom serializer', function() {
-    var form = domify('<form><input type="text" name="node" value="zuul">/</form>');
+    var form = domify('<form><input type="text" name="node" value="zuul" /></form>');
 
     assert.deepEqual(serialize(form, {
         serializer: function(curry, k, v) {
@@ -511,4 +511,46 @@ test('custom serializer', function() {
     }), {
         'node': 'ZUUL'
     });
+});
+
+test('deserialize', function() {
+    // We don't include `keygen` as on way out
+    var form = domify(`
+<form>
+    <input type="text" name="textBox" />
+    <input type="checkbox" name="checkBox1" />
+    <input type="radio" name="radio1" value="a" />
+    <input type="radio" name="radio1" value="b" />
+    <textarea name="textarea1"></textarea>
+    <select name="select1">
+        <option value="opt1">Option 1</option>
+        <option value="opt2">Option 2</option>
+        <option value="opt3">Option 3</option>
+    </select>
+    <select name="selectMultiple1" multiple="multiple">
+        <option value="opt1">Option 1</option>
+        <option value="opt2">Option 2</option>
+        <option value="opt3">Option 3</option>
+        <option>Option 4</option>
+    </select>
+</form>
+`);
+    var hash = {
+        textBox: 'xyz',
+        checkBox1: 'on',
+        radio1: 'b',
+        textarea1: 'some text',
+        select1: 'opt2',
+        selectMultiple1: ['opt3', 'Option 4']
+    };
+    serialize.deserialize(form, hash);
+    assert.deepEqual(form.textBox.value, 'xyz');
+    assert.deepEqual(form.checkBox1.checked, true);
+    assert.deepEqual(form.radio1.value, 'b');
+    assert.deepEqual(form.textarea1.value, 'some text');
+    assert.deepEqual(form.select1.value, 'opt2');
+    assert.deepEqual([...form.selectMultiple1.selectedOptions].map(function (o) {
+        return o.value;
+    }), ['opt3', 'Option 4']);
+    // assert.deepEqual(serialize(form, {hash: true}), hash);
 });

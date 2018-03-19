@@ -48,7 +48,7 @@ function serialize(form, options) {
         if ((!options.disabled && element.disabled) || !element.name) {
             continue;
         }
-        // ignore anyhting that is not considered a success field
+        // ignore anything that is not considered a success field
         if (!k_r_success_contrls.test(element.nodeName) ||
             k_r_submitter.test(element.type)) {
             continue;
@@ -80,7 +80,7 @@ function serialize(form, options) {
                 }
             }
 
-            // if options empty is true, continue only if its radio
+            // if options empty is true, continue only if it's radio
             if (val === undefined && element.type === 'radio') {
                 continue;
             }
@@ -260,10 +260,34 @@ function str_serialize(result, key, value) {
     return result + (result ? '&' : '') + encodeURIComponent(key) + '=' + value;
 }
 
+function deserialize (form, hash) {
+    // input(text|radio|checkbox)|select(multiple)|textarea|keygen
+    Object.keys(hash).forEach(function (name) {
+        var value = hash[name];
+        var control = form[name];
+        var inputType = control.type;
+        if (['checkbox', 'radio'].includes(inputType)) {
+            control.checked = true;
+        }
+        if (inputType === 'select-multiple' && Array.isArray(value)) {
+            [].slice.call(control.options).forEach(function (o) {
+                if (value.includes(o.value)) {
+                    o.selected = true;
+                }
+            });
+        } else {
+            control.value = value;
+        }
+    });
+}
+
+serialize.deserialize = deserialize;
+
 if (typeof module !== 'undefined') {
     module.exports = serialize;
 } else {
     window.formSerialize = serialize;
+    window.formDeserialize = deserialize;
 }
 
 /* eslint-enable indent */
