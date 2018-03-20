@@ -33,7 +33,7 @@ var obj = serialize(form, { hash: true });
 
 ## api
 
-### serialize(form [, options])
+### serialize(form \[, options])
 
 Returns a serialized form of a HTMLForm element. Output is determined by the serializer used. Default serializer is url-encoded.
 

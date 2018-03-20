@@ -1,219 +1,222 @@
 /* globals test */
-var assert = require('assert');
-var domify = require('domify');
+import {serialize, deserialize} from '../src/index.js';
 
-var serialize = require('../');
+// import assert from 'assert';
+// import domify from 'domify';
 
-var hash_check = function(form, exp) {
+const assert = require('assert');
+const domify = require('domify');
+
+function hashCheck (form, exp) {
     assert.deepEqual(serialize(form, { hash: true }), exp);
-};
+}
 
-var str_check = function(form, exp) {
+function strCheck (form, exp) {
     assert.equal(serialize(form), exp);
-};
+}
 
-var disabled_check = function(form, exp) {
+function disabledCheck (form, exp) {
     assert.deepEqual(serialize(form, { hash: false, disabled: true }), exp);
-};
+}
 
-var empty_check = function(form, exp) {
+function emptyCheck (form, exp) {
     assert.deepEqual(serialize(form, { hash: false, disabled: true, empty: true }), exp);
-};
+}
 
-var empty_check_hash = function(form, exp) {
+function emptyCheckHash (form, exp) {
     assert.deepEqual(serialize(form, { hash: true, disabled: true, empty: true }), exp);
-};
+}
 
-test('null form', function() {
-    hash_check(null, {});
-    str_check(null, '');
-    empty_check(null, '');
-    empty_check_hash(null, {});
+test('null form', function () {
+    hashCheck(null, {});
+    strCheck(null, '');
+    emptyCheck(null, '');
+    emptyCheckHash(null, {});
 });
 
-test('bad form', function() {
-    var form = {};
-    hash_check(form, {});
-    str_check(form, '');
-    empty_check(form, '');
-    empty_check_hash(form, {});
+test('bad form', function () {
+    const form = {};
+    hashCheck(form, {});
+    strCheck(form, '');
+    emptyCheck(form, '');
+    emptyCheckHash(form, {});
 });
 
-test('empty form', function() {
-    var form = domify('<form></form>');
-    hash_check(form, {});
-    str_check(form, '');
-    empty_check(form, '');
-    empty_check_hash(form, {});
+test('empty form', function () {
+    const form = domify('<form></form>');
+    hashCheck(form, {});
+    strCheck(form, '');
+    emptyCheck(form, '');
+    emptyCheckHash(form, {});
 });
 
 // basic form with single input
-test('single element', function() {
-    var form = domify('<form><input type="text" name="foo" value="bar"/></form>');
-    hash_check(form, {
+test('single element', function () {
+    const form = domify('<form><input type="text" name="foo" value="bar"/></form>');
+    hashCheck(form, {
         'foo': 'bar'
     });
-    str_check(form, 'foo=bar');
-    empty_check(form, 'foo=bar');
-    empty_check_hash(form, {
+    strCheck(form, 'foo=bar');
+    emptyCheck(form, 'foo=bar');
+    emptyCheckHash(form, {
         'foo': 'bar'
     });
 });
 
-test('ignore no value', function() {
-    var form = domify('<form><input type="text" name="foo"/></form>');
-    hash_check(form, {});
-    str_check(form, '');
+test('ignore no value', function () {
+    const form = domify('<form><input type="text" name="foo"/></form>');
+    hashCheck(form, {});
+    strCheck(form, '');
 });
 
-test('do not ignore no value when empty option', function() {
-    var form = domify('<form><input type="text" name="foo"/></form>');
-    empty_check(form, 'foo=');
-    empty_check_hash(form, {
+test('do not ignore no value when empty option', function () {
+    const form = domify('<form><input type="text" name="foo"/></form>');
+    emptyCheck(form, 'foo=');
+    emptyCheckHash(form, {
         'foo': ''
     });
 });
 
-test('multi inputs', function() {
-    var form = domify('<form>' +
+test('multi inputs', function () {
+    const form = domify('<form>' +
         '<input type="text" name="foo" value="bar 1"/>' +
         '<input type="text" name="foo.bar" value="bar 2"/>' +
         '<input type="text" name="baz.foo" value="bar 3"/>' +
         '</form>');
-    hash_check(form, {
+    hashCheck(form, {
         'foo': 'bar 1',
         'foo.bar': 'bar 2',
         'baz.foo': 'bar 3'
     });
-    str_check(form, 'foo=bar+1&foo.bar=bar+2&baz.foo=bar+3');
+    strCheck(form, 'foo=bar+1&foo.bar=bar+2&baz.foo=bar+3');
 });
 
-test('handle disabled', function() {
-    var form = domify('<form>' +
+test('handle disabled', function () {
+    const form = domify('<form>' +
         '<input type="text" name="foo" value="bar 1"/>' +
         '<input type="text" name="foo.bar" value="bar 2" disabled/>' +
         '</form>');
-    hash_check(form, {
+    hashCheck(form, {
         'foo': 'bar 1'
     });
-    str_check(form, 'foo=bar+1');
-    disabled_check(form, 'foo=bar+1&foo.bar=bar+2');
+    strCheck(form, 'foo=bar+1');
+    disabledCheck(form, 'foo=bar+1&foo.bar=bar+2');
 });
 
-test('handle disabled and empty', function() {
-    var form = domify('<form>' +
+test('handle disabled and empty', function () {
+    const form = domify('<form>' +
         '<input type="text" name="foo" value=""/>' +
         '<input type="text" name="foo.bar" value="" disabled/>' +
         '</form>');
-    hash_check(form, {});
-    str_check(form, '');
-    disabled_check(form, '');
-    empty_check(form, 'foo=&foo.bar=');
-    empty_check_hash(form, {
+    hashCheck(form, {});
+    strCheck(form, '');
+    disabledCheck(form, '');
+    emptyCheck(form, 'foo=&foo.bar=');
+    emptyCheckHash(form, {
         'foo': '',
         'foo.bar': ''
     });
 });
 
-test('ignore buttons', function() {
-    var form = domify('<form>' +
+test('ignore buttons', function () {
+    const form = domify('<form>' +
         '<input type="submit" name="foo" value="submit"/>' +
         '<input type="reset" name="foo.bar" value="reset"/>' +
         '</form>');
-    hash_check(form, {});
-    str_check(form, '');
+    hashCheck(form, {});
+    strCheck(form, '');
 });
 
-test('checkboxes', function() {
-    var form = domify('<form>' +
+test('checkboxes', function () {
+    const form = domify('<form>' +
         '<input type="checkbox" name="foo" checked/>' +
         '<input type="checkbox" name="bar"/>' +
         '<input type="checkbox" name="baz" checked/>' +
         '</form>');
-    hash_check(form, {
+    hashCheck(form, {
         'foo': 'on',
         'baz': 'on'
     });
-    str_check(form, 'foo=on&baz=on');
-    empty_check(form, 'foo=on&bar=&baz=on');
-    empty_check_hash(form, {
+    strCheck(form, 'foo=on&baz=on');
+    emptyCheck(form, 'foo=on&bar=&baz=on');
+    emptyCheckHash(form, {
         'foo': 'on',
         'bar': '',
         'baz': 'on'
     });
 });
 
-test('checkboxes - array', function() {
-    var form = domify('<form>' +
+test('checkboxes - array', function () {
+    const form = domify('<form>' +
         '<input type="checkbox" name="foo[]" value="bar" checked/>' +
         '<input type="checkbox" name="foo[]" value="baz" checked/>' +
         '<input type="checkbox" name="foo[]" value="baz"/>' +
         '</form>');
-    hash_check(form, {
+    hashCheck(form, {
         'foo': ['bar', 'baz']
     });
-    str_check(form, 'foo%5B%5D=bar&foo%5B%5D=baz');
-    empty_check(form, 'foo%5B%5D=bar&foo%5B%5D=baz&foo%5B%5D=');
-    empty_check_hash(form, {
+    strCheck(form, 'foo%5B%5D=bar&foo%5B%5D=baz');
+    emptyCheck(form, 'foo%5B%5D=bar&foo%5B%5D=baz&foo%5B%5D=');
+    emptyCheckHash(form, {
         'foo': ['bar', 'baz', '']
     });
 });
 
-test('checkboxes - array with single item', function() {
-    var form = domify('<form>' +
+test('checkboxes - array with single item', function () {
+    const form = domify('<form>' +
         '<input type="checkbox" name="foo[]" value="bar" checked/>' +
         '</form>');
-    hash_check(form, {
+    hashCheck(form, {
         'foo': ['bar']
     });
-    str_check(form, 'foo%5B%5D=bar');
+    strCheck(form, 'foo%5B%5D=bar');
 });
 
-test('select - single', function() {
-    var form = domify('<form>' +
+test('select - single', function () {
+    const form = domify('<form>' +
         '<select name="foo">' +
         '<option value="bar">bar</option>' +
         '<option value="baz" selected>baz</option>' +
         '</select>' +
         '</form>');
-    hash_check(form, {
+    hashCheck(form, {
         'foo': 'baz'
     });
-    str_check(form, 'foo=baz');
+    strCheck(form, 'foo=baz');
 });
 
 test('select - single - empty', function () {
-    var form = domify('<form>' +
+    const form = domify('<form>' +
         '<select name="foo">' +
         '<option value="">empty</option>' +
         '<option value="bar">bar</option>' +
         '<option value="baz">baz</option>' +
         '</select>' +
         '</form>');
-    hash_check(form, {});
-    str_check(form, '');
-    empty_check(form, 'foo=');
-    empty_check_hash(form, {
+    hashCheck(form, {});
+    strCheck(form, '');
+    emptyCheck(form, 'foo=');
+    emptyCheckHash(form, {
         'foo': ''
     });
 });
 
-test('select - multiple', function() {
-    var form = domify('<form>' +
+test('select - multiple', function () {
+    const form = domify('<form>' +
         '<select name="foo" multiple>' +
         '<option value="bar" selected>bar</option>' +
         '<option value="baz">baz</option>' +
         '<option value="cat" selected>cat</option>' +
         '</select>' +
         '</form>');
-    hash_check(form, {
+    hashCheck(form, {
         'foo': ['bar', 'cat']
     });
-    str_check(form, 'foo=bar&foo=cat');
+    strCheck(form, 'foo=bar&foo=cat');
 });
 
-test('select - multiple - empty', function() {
-    var form = domify('<form>' +
+test('select - multiple - empty', function () {
+    const form = domify('<form>' +
         '<select name="foo" multiple>' +
         '<option value="">empty</option>' +
         '<option value="bar">bar</option>' +
@@ -221,68 +224,68 @@ test('select - multiple - empty', function() {
         '<option value="cat">cat</option>' +
         '</select>' +
         '</form>');
-    hash_check(form, {});
-    str_check(form, '');
-    empty_check(form, 'foo=');
-    empty_check_hash(form, {
+    hashCheck(form, {});
+    strCheck(form, '');
+    emptyCheck(form, 'foo=');
+    emptyCheckHash(form, {
         'foo': ''
     });
 });
 
-test('radio - no default', function() {
-    var form = domify('<form>' +
+test('radio - no default', function () {
+    const form = domify('<form>' +
         '<input type="radio" name="foo" value="bar1"/>' +
         '<input type="radio" name="foo" value="bar2"/>' +
         '</form>');
-    hash_check(form, {});
-    str_check(form, '');
-    empty_check(form, 'foo=');
-    empty_check_hash(form, {
+    hashCheck(form, {});
+    strCheck(form, '');
+    emptyCheck(form, 'foo=');
+    emptyCheckHash(form, {
         'foo': ''
     });
 });
 
-test('radio - single default', function() {
-    var form = domify('<form>' +
+test('radio - single default', function () {
+    const form = domify('<form>' +
         '<input type="radio" name="foo" value="bar1" checked="checked"/>' +
         '<input type="radio" name="foo" value="bar2"/>' +
         '</form>');
-    hash_check(form, {
+    hashCheck(form, {
         foo: 'bar1'
     });
-    str_check(form, 'foo=bar1');
-    empty_check(form, 'foo=bar1');
-    empty_check_hash(form, {
+    strCheck(form, 'foo=bar1');
+    emptyCheck(form, 'foo=bar1');
+    emptyCheckHash(form, {
         foo: 'bar1'
     });
 });
 
-test('radio - empty value', function() {
-    var form = domify('<form>' +
+test('radio - empty value', function () {
+    const form = domify('<form>' +
         '<input type="radio" name="foo" value="" checked="checked"/>' +
         '<input type="radio" name="foo" value="bar2"/>' +
         '</form>');
-    hash_check(form, {});
-    str_check(form, '');
-    empty_check(form, 'foo=');
-    empty_check_hash(form, {
+    hashCheck(form, {});
+    strCheck(form, '');
+    emptyCheck(form, 'foo=');
+    emptyCheckHash(form, {
         'foo': ''
     });
 });
 
 // in this case the radio buttons and checkboxes share a name key
 // the checkbox value should still be honored
-test('radio w/checkbox', function() {
-    var form = domify('<form>' +
+test('radio w/checkbox', function () {
+    let form = domify('<form>' +
         '<input type="radio" name="foo" value="bar1" checked="checked"/>' +
         '<input type="radio" name="foo" value="bar2"/>' +
         '<input type="checkbox" name="foo" value="bar3" checked="checked"/>' +
         '<input type="checkbox" name="foo" value="bar4"/>' +
         '</form>');
-    hash_check(form, {
+    hashCheck(form, {
         foo: ['bar1', 'bar3']
     });
-    str_check(form, 'foo=bar1&foo=bar3');
+    strCheck(form, 'foo=bar1&foo=bar3');
 
     // leading checkbox
     form = domify('<form>' +
@@ -292,14 +295,14 @@ test('radio w/checkbox', function() {
         '<input type="checkbox" name="foo" value="bar4"/>' +
         '<input type="checkbox" name="foo" value="bar5" checked="checked"/>' +
         '</form>');
-    hash_check(form, {
+    hashCheck(form, {
         foo: ['bar3', 'bar1', 'bar5']
     });
-    str_check(form, 'foo=bar3&foo=bar1&foo=bar5');
+    strCheck(form, 'foo=bar3&foo=bar1&foo=bar5');
 });
 
-test('bracket notation - hashes', function() {
-    var form = domify('<form>' +
+test('bracket notation - hashes', function () {
+    const form = domify('<form>' +
         '<input type="email" name="account[name]" value="Foo Dude">' +
         '<input type="text" name="account[email]" value="foobar@example.org">' +
         '<input type="text" name="account[address][city]" value="Qux">' +
@@ -307,7 +310,7 @@ test('bracket notation - hashes', function() {
         '<input type="text" name="account[address][empty]" value="">' +
         '</form>');
 
-    hash_check(form, {
+    hashCheck(form, {
         account: {
             name: 'Foo Dude',
             email: 'foobar@example.org',
@@ -318,7 +321,7 @@ test('bracket notation - hashes', function() {
         }
     });
 
-    empty_check_hash(form, {
+    emptyCheckHash(form, {
         account: {
             name: 'Foo Dude',
             email: 'foobar@example.org',
@@ -331,13 +334,13 @@ test('bracket notation - hashes', function() {
     });
 });
 
-test('bracket notation - hashes with a digit as the first symbol in a key', function() {
-    var form = domify('<form>' +
+test('bracket notation - hashes with a digit as the first symbol in a key', function () {
+    const form = domify('<form>' +
         '<input type="text" name="somekey[123abc][first]" value="first_value">' +
         '<input type="text" name="somekey[123abc][second]" value="second_value">' +
         '</form>');
 
-    hash_check(form, {
+    hashCheck(form, {
         'somekey': {
             '123abc': {
                 'first': 'first_value',
@@ -346,7 +349,7 @@ test('bracket notation - hashes with a digit as the first symbol in a key', func
         }
     });
 
-    empty_check_hash(form, {
+    emptyCheckHash(form, {
         'somekey': {
             '123abc': {
                 'first': 'first_value',
@@ -356,8 +359,8 @@ test('bracket notation - hashes with a digit as the first symbol in a key', func
     });
 });
 
-test('bracket notation - select multiple', function() {
-    var form = domify('<form>' +
+test('bracket notation - select multiple', function () {
+    let form = domify('<form>' +
         '<select name="foo" multiple>' +
         '  <option value="bar" selected>Bar</option>' +
         '  <option value="baz">Baz</option>' +
@@ -365,7 +368,7 @@ test('bracket notation - select multiple', function() {
         '</select>' +
         '</form>');
 
-    hash_check(form, {
+    hashCheck(form, {
         foo: [ 'bar', 'qux' ]
     });
 
@@ -378,13 +381,13 @@ test('bracket notation - select multiple', function() {
         '</select>' +
         '</form>');
 
-    hash_check(form, {
+    hashCheck(form, {
         foo: [ 'bar', 'qux' ]
     });
 });
 
-test('bracket notation - select multiple, nested', function() {
-    var form = domify('<form>' +
+test('bracket notation - select multiple, nested', function () {
+    const form = domify('<form>' +
         '<select name="foo[bar]" multiple>' +
         '  <option value="baz" selected>Baz</option>' +
         '  <option value="qux">Qux</option>' +
@@ -392,15 +395,15 @@ test('bracket notation - select multiple, nested', function() {
         '</select>' +
         '</form>');
 
-    hash_check(form, {
+    hashCheck(form, {
         foo: {
             bar: [ 'baz', 'norf' ]
         }
     });
 });
 
-test('bracket notation - select multiple, empty values', function() {
-    var form = domify('<form>' +
+test('bracket notation - select multiple, empty values', function () {
+    const form = domify('<form>' +
         '<select name="foo[bar]" multiple>' +
         '  <option selected>Default value</option>' +
         '  <option value="" selected>Empty value</option>' +
@@ -410,27 +413,27 @@ test('bracket notation - select multiple, empty values', function() {
         '</select>' +
         '</form>');
 
-    hash_check(form, {
+    hashCheck(form, {
         foo: {
             bar: [ 'Default value', 'baz', 'norf' ]
         }
     });
 
-    empty_check_hash(form, {
+    emptyCheckHash(form, {
         foo: {
             bar: [ 'Default value', '', 'baz', 'norf' ]
         }
     });
 });
 
-test('bracket notation - non-indexed arrays', function() {
-    var form = domify('<form>' +
+test('bracket notation - non-indexed arrays', function () {
+    const form = domify('<form>' +
         '<input name="people[][name]" value="fred" />' +
         '<input name="people[][name]" value="bob" />' +
         '<input name="people[][name]" value="bubba" />' +
         '</form>');
 
-    hash_check(form, {
+    hashCheck(form, {
         people: [
             { name: 'fred' },
             { name: 'bob' },
@@ -439,21 +442,21 @@ test('bracket notation - non-indexed arrays', function() {
     });
 });
 
-test('bracket notation - nested, non-indexed arrays', function() {
-    var form = domify('<form>' +
+test('bracket notation - nested, non-indexed arrays', function () {
+    const form = domify('<form>' +
         '<input name="user[tags][]" value="cow" />' +
         '<input name="user[tags][]" value="milk" />' +
         '</form>');
 
-    hash_check(form, {
+    hashCheck(form, {
         user: {
             tags: [ 'cow', 'milk' ]
         }
     });
 });
 
-test('bracket notation - indexed arrays', function() {
-    var form = domify('<form>' +
+test('bracket notation - indexed arrays', function () {
+    const form = domify('<form>' +
         '<input name="people[2][name]" value="bubba" />' +
         '<input name="people[2][age]" value="15" />' +
         '<input name="people[0][name]" value="fred" />' +
@@ -464,7 +467,7 @@ test('bracket notation - indexed arrays', function() {
         '<input name="people[3][age]" value="2">' +
         '</form>');
 
-    hash_check(form, {
+    hashCheck(form, {
         people: [
             {
                 name: 'fred',
@@ -486,13 +489,13 @@ test('bracket notation - indexed arrays', function() {
     });
 });
 
-test('bracket notation - bad notation', function() {
-    var form = domify('<form>' +
+test('bracket notation - bad notation', function () {
+    const form = domify('<form>' +
         '<input name="[][foo]" value="bar" />' +
         '<input name="[baz][qux]" value="norf" />' +
         '</form>');
 
-    hash_check(form, {
+    hashCheck(form, {
         _values: [
             { foo: 'bar' }
         ],
@@ -500,11 +503,11 @@ test('bracket notation - bad notation', function() {
     });
 });
 
-test('custom serializer', function() {
-    var form = domify('<form><input type="text" name="node" value="zuul" /></form>');
+test('custom serializer', function () {
+    const form = domify('<form><input type="text" name="node" value="zuul" /></form>');
 
     assert.deepEqual(serialize(form, {
-        serializer: function(curry, k, v) {
+        serializer (curry, k, v) {
             curry[k] = 'ZUUL';
             return curry;
         }
@@ -513,12 +516,13 @@ test('custom serializer', function() {
     });
 });
 
-test('deserialize', function() {
+test('deserialize', function () {
     // We don't include `keygen` as on way out
-    var form = domify(`
+    const form = domify(`
 <form>
     <input type="text" name="textBox" />
     <input type="checkbox" name="checkBox1" />
+    <input type="checkbox" name="checkBox2" />
     <input type="radio" name="radio1" value="a" />
     <input type="radio" name="radio1" value="b" />
     <textarea name="textarea1"></textarea>
@@ -535,7 +539,7 @@ test('deserialize', function() {
     </select>
 </form>
 `);
-    var hash = {
+    const hash = {
         textBox: 'xyz',
         checkBox1: 'on',
         radio1: 'b',
@@ -543,9 +547,11 @@ test('deserialize', function() {
         select1: 'opt2',
         selectMultiple1: ['opt3', 'Option 4']
     };
-    serialize.deserialize(form, hash);
+    // console.log(serialize(form, {hash: true, empty: true}));
+    deserialize(form, hash);
     assert.deepEqual(form.textBox.value, 'xyz');
     assert.deepEqual(form.checkBox1.checked, true);
+    assert.deepEqual(form.checkBox2.checked, false);
     assert.deepEqual(form.radio1.value, 'b');
     assert.deepEqual(form.textarea1.value, 'some text');
     assert.deepEqual(form.select1.value, 'opt2');
@@ -553,4 +559,55 @@ test('deserialize', function() {
         return o.value;
     }), ['opt3', 'Option 4']);
     // assert.deepEqual(serialize(form, {hash: true}), hash);
+});
+
+test('deserialize arrays', function () {
+    // We don't include `keygen` as on way out
+    const form = domify(`
+<form>
+    <input type="text" name="arr1[]" id="textBox" value="initial1" />
+    <input type="checkbox" name="arr1[]" id="checkBox1" value="initial2" />
+    <input type="checkbox" name="arr1[]" id="checkBox2" value="initial3" />
+    <input type="radio" name="arr2[]" value="a" id="radio1" checked="checked" />
+    <input type="radio" name="arr2[]" value="b" id="radio2" />
+    <textarea name="arr1[]" id="textarea1">initial4</textarea>
+    <select name="arr1[]" id="select1">
+        <option value="opt1">Option 1</option>
+        <option value="opt2">Option 2</option>
+        <option value="opt3">Option 3</option>
+    </select>
+    <select name="arr3[]" multiple="multiple" id="selectMultiple1">
+        <option value="opt1">Option 1</option>
+        <option value="opt2">Option 2</option>
+        <option value="opt3">Option 3</option>
+        <option>Option 4</option>
+    </select>
+</form>
+`);
+    const hash = {
+        arr1: ['text1', '', 'on', 'Text 2', 'opt2'],
+        arr2: 'b',
+        arr3: ['opt1', 'opt3']
+    };
+    function $ (sel) {
+        return form.querySelector(sel);
+    }
+    // console.log(serialize(form, {hash: true, empty: true}));
+    deserialize(form, hash);
+    // assert.deepEqual(form.arr1, 'xyz');
+    assert.deepEqual($('#textBox').value, 'text1');
+    assert.deepEqual($('#checkBox1').checked, false);
+    assert.deepEqual($('#checkBox2').checked, true);
+    assert.deepEqual($('#radio1').checked, false);
+    assert.deepEqual($('#radio2').checked, true);
+    assert.deepEqual($('#textarea1').value, 'Text 2');
+    assert.deepEqual($('#select1').value, 'opt2');
+    assert.deepEqual(
+        [...$('#selectMultiple1').selectedOptions].map(
+            function (o) {
+                return o.value;
+            }
+        ),
+        ['opt1', 'opt3']
+    );
 });

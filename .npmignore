@@ -1,0 +1,5 @@
+# Keep `src` for now for module
+
+test
+*.*
+!index.js

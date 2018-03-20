@@ -2,13 +2,10 @@
   "extends": "standard",
   "rules": {
     "semi": [2, "always"],
-    "indent": ["error", 4],
-    "camelcase": [0],
-    "brace-style": [0],
-    "space-before-function-paren": [0],
-    "no-useless-escape": [0],
-    "semi-spacing": [0],
-    "space-infix-ops": [0],
-    "no-redeclare": [0]
+    "indent": ["error", 4, {"outerIIFEBody": 0}],
+    "object-property-newline": 0,
+    "one-var": 0,
+    "no-var": 2,
+    "prefer-const": 2
   }
 }
