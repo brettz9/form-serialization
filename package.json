@@ -2,37 +2,34 @@
   "name": "form-serialize",
   "version": "0.7.2",
   "description": "serialize html forms",
-  "main": "index.js",
-  "browser": "src/index.js",
-  "module": "src/index.js",
+  "main": "dist/index.js",
+  "browser": "dist/index.js",
+  "module": "dist/index-es.js",
   "directories": {
     "test": "test"
   },
+  "dependencies": {},
   "devDependencies": {
-    "babel-core": "6.26.0",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-preset-env": "^1.6.1",
+    "@babel/core": "^7.1.2",
+    "@babel/preset-env": "^7.1.0",
     "domify": "~1.4.0",
-    "eslint": "4.19.0",
-    "eslint-config-standard": "11.0.0",
-    "eslint-plugin-compat": "2.2.0",
-    "eslint-plugin-import": "2.9.0",
-    "eslint-plugin-node": "6.0.1",
-    "eslint-plugin-promise": "3.7.0",
-    "eslint-plugin-standard": "3.0.1",
-    "rollup": "0.57.1",
-    "rollup-plugin-babel": "^3.0.3",
-    "rollup-plugin-commonjs": "^9.1.0",
-    "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-node-resolve": "^3.3.0",
-    "zuul": "~3.11.1"
+    "eslint": "5.8.0",
+    "eslint-config-standard": "12.0.0",
+    "eslint-plugin-compat": "2.6.2",
+    "eslint-plugin-import": "2.14.0",
+    "eslint-plugin-node": "8.0.0",
+    "eslint-plugin-promise": "4.0.1",
+    "eslint-plugin-standard": "4.0.0",
+    "rollup": "0.66.6",
+    "rollup-plugin-babel": "^4.0.3",
+    "zuul": "~3.12.0"
   },
   "scripts": {
     "eslint": "eslint .",
     "rollup": "rollup -c",
-    "test": "npm run rollup && zuul -- test/index-polyglot.js",
-    "test-local": "npm run rollup && npm run zuul-local",
-    "zuul-local": "zuul --local 8080 -- test/index-polyglot.js"
+    "test": "npm run eslint && npm run rollup && zuul -- test/index-polyglot.js",
+    "test-local": "npm run eslint && npm run rollup && npm run zuul-local",
+    "zuul-local": "zuul --local 8081 -- test/index-polyglot.js"
   },
   "repository": {
     "type": "git",
@@ -47,6 +44,10 @@
     "Brett Zamir"
   ],
   "license": "MIT",
+  "engines": {
+      "node": "*"
+  },
+  "homepage": "https://github.com/shtylman/form-serialize",
   "bugs": {
     "url": "https://github.com/shtylman/form-serialize/issues"
   }

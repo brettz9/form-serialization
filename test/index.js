@@ -1,4 +1,9 @@
 /* globals test */
+/* eslint-disable node/no-deprecated-api */
+
+// Converting `assert.deepEqual` to `assert.deepStrictEqual` and
+//  `assert.equal` to `assert.deepEqual` does not work with zuul here
+
 import {serialize, deserialize} from '../src/index.js';
 
 // import assert from 'assert';
@@ -8,7 +13,7 @@ const assert = require('assert');
 const domify = require('domify');
 
 function hashCheck (form, exp) {
-    assert.deepEqual(serialize(form, { hash: true }), exp);
+    assert.deepEqual(serialize(form, {hash: true}), exp);
 }
 
 function strCheck (form, exp) {
@@ -16,15 +21,15 @@ function strCheck (form, exp) {
 }
 
 function disabledCheck (form, exp) {
-    assert.deepEqual(serialize(form, { hash: false, disabled: true }), exp);
+    assert.deepEqual(serialize(form, {hash: false, disabled: true}), exp);
 }
 
 function emptyCheck (form, exp) {
-    assert.deepEqual(serialize(form, { hash: false, disabled: true, empty: true }), exp);
+    assert.deepEqual(serialize(form, {hash: false, disabled: true, empty: true}), exp);
 }
 
 function emptyCheckHash (form, exp) {
-    assert.deepEqual(serialize(form, { hash: true, disabled: true, empty: true }), exp);
+    assert.deepEqual(serialize(form, {hash: true, disabled: true, empty: true}), exp);
 }
 
 test('null form', function () {
@@ -435,9 +440,9 @@ test('bracket notation - non-indexed arrays', function () {
 
     hashCheck(form, {
         people: [
-            { name: 'fred' },
-            { name: 'bob' },
-            { name: 'bubba' }
+            {name: 'fred'},
+            {name: 'bob'},
+            {name: 'bubba'}
         ]
     });
 });
@@ -497,9 +502,9 @@ test('bracket notation - bad notation', function () {
 
     hashCheck(form, {
         _values: [
-            { foo: 'bar' }
+            {foo: 'bar'}
         ],
-        baz: { qux: 'norf' }
+        baz: {qux: 'norf'}
     });
 });
 
