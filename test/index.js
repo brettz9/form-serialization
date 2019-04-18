@@ -1,8 +1,5 @@
 /* eslint-env node, mocha */
-/* eslint-disable node/no-deprecated-api, import/no-commonjs, require-jsdoc */
-
-// Converting `assert.deepEqual` to `assert.deepStrictEqual` and
-//  `assert.equal` to `assert.deepEqual` does not work with zuul here
+/* eslint-disable import/no-commonjs, require-jsdoc */
 
 import {serialize, deserialize} from '../src/index.js';
 
@@ -19,27 +16,27 @@ global.document = document;
 const domify = require('domify');
 
 function hashCheck (form, exp) {
-  assert.deepEqual(serialize(form, {hash: true}), exp);
+  assert.deepStrictEqual(serialize(form, {hash: true}), exp);
 }
 
 function strCheck (form, exp) {
-  assert.equal(serialize(form), exp);
+  assert.deepStrictEqual(serialize(form), exp);
 }
 
 function disabledCheck (form, exp) {
-  assert.deepEqual(serialize(form, {
+  assert.deepStrictEqual(serialize(form, {
     hash: false, disabled: true
   }), exp);
 }
 
 function emptyCheck (form, exp) {
-  assert.deepEqual(serialize(form, {
+  assert.deepStrictEqual(serialize(form, {
     hash: false, disabled: true, empty: true
   }), exp);
 }
 
 function emptyCheckHash (form, exp) {
-  assert.deepEqual(serialize(form, {
+  assert.deepStrictEqual(serialize(form, {
     hash: true, disabled: true, empty: true
   }), exp);
 }
@@ -532,7 +529,7 @@ test('custom serializer', function () {
     '<form><input type="text" name="node" value="zuul" /></form>'
   );
 
-  assert.deepEqual(serialize(form, {
+  assert.deepStrictEqual(serialize(form, {
     serializer (curry, k, v) {
       curry[k] = 'ZUUL';
       return curry;
@@ -575,16 +572,18 @@ test('deserialize', function () {
   };
   // console.log(serialize(form, {hash: true, empty: true}));
   deserialize(form, hash);
-  assert.deepEqual(form.textBox.value, 'xyz');
-  assert.deepEqual(form.checkBox1.checked, true);
-  assert.deepEqual(form.checkBox2.checked, false);
-  assert.deepEqual(form.radio1.value, 'b');
-  assert.deepEqual(form.textarea1.value, 'some text');
-  assert.deepEqual(form.select1.value, 'opt2');
-  assert.deepEqual([...form.selectMultiple1.selectedOptions].map(function (o) {
-    return o.value;
-  }), ['opt3', 'Option 4']);
-  // assert.deepEqual(serialize(form, {hash: true}), hash);
+  assert.deepStrictEqual(form.textBox.value, 'xyz');
+  assert.deepStrictEqual(form.checkBox1.checked, true);
+  assert.deepStrictEqual(form.checkBox2.checked, false);
+  assert.deepStrictEqual(form.radio1.value, 'b');
+  assert.deepStrictEqual(form.textarea1.value, 'some text');
+  assert.deepStrictEqual(form.select1.value, 'opt2');
+  assert.deepStrictEqual(
+    [...form.selectMultiple1.selectedOptions].map(function (o) {
+      return o.value;
+    }), ['opt3', 'Option 4']
+  );
+  // assert.deepStrictEqual(serialize(form, {hash: true}), hash);
 });
 
 test('deserialize arrays', function () {
@@ -620,15 +619,15 @@ test('deserialize arrays', function () {
   }
   // console.log(serialize(form, {hash: true, empty: true}));
   deserialize(form, hash);
-  // assert.deepEqual(form.arr1, 'xyz');
-  assert.deepEqual($('#textBox').value, 'text1');
-  assert.deepEqual($('#checkBox1').checked, false);
-  assert.deepEqual($('#checkBox2').checked, true);
-  assert.deepEqual($('#radio1').checked, false);
-  assert.deepEqual($('#radio2').checked, true);
-  assert.deepEqual($('#textarea1').value, 'Text 2');
-  assert.deepEqual($('#select1').value, 'opt2');
-  assert.deepEqual(
+  // assert.deepStrictEqual(form.arr1, 'xyz');
+  assert.deepStrictEqual($('#textBox').value, 'text1');
+  assert.deepStrictEqual($('#checkBox1').checked, false);
+  assert.deepStrictEqual($('#checkBox2').checked, true);
+  assert.deepStrictEqual($('#radio1').checked, false);
+  assert.deepStrictEqual($('#radio2').checked, true);
+  assert.deepStrictEqual($('#textarea1').value, 'Text 2');
+  assert.deepStrictEqual($('#select1').value, 'opt2');
+  assert.deepStrictEqual(
     [...$('#selectMultiple1').selectedOptions].map(
       function (o) {
         return o.value;

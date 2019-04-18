@@ -1,3 +1,8 @@
+# 0.9.0 (2019-04-18)
+
+- Enhancement: Bundle jsdoc in npm for sake of npm CDNs (like
+    <https://unpkg.com>)
+
 # 0.8.0 (2019-04-18) - New release as "form-serialization"
 
 - Breaking change: Require Node >= 7.0.0

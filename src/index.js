@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-unsafe-regex */
 /**
  *
  * Get successful control from form and assemble into object
@@ -8,13 +7,13 @@
 
 // types which indicate a submit action and are not successful controls
 // these will be ignored
-const kRSubmitter = /^(?:submit|button|image|reset|file)$/iu;
+const kRSubmitter = /^(?:submit|button|image|reset|file)$/i;
 
 // node names which could be successful controls
-const kRSuccessContrls = /^(?:input|select|textarea|keygen)/iu;
+const kRSuccessContrls = /^(?:input|select|textarea|keygen)/i;
 
 // Matches bracket notation.
-const brackets = /(\[[^[\]]*\])/gu;
+const brackets = /(\[[^[\]]*\])/g;
 
 /**
  * @callback module:FormSerialization.Serializer
@@ -159,8 +158,8 @@ export function serialize (form, options) {
  */
 function parseKeys (string) {
   const keys = [];
-  const prefix = /^([^[\]]*)/u;
-  const children = new RegExp(brackets, 'u');
+  const prefix = /^([^[\]]*)/;
+  const children = new RegExp(brackets);
   let match = prefix.exec(string);
 
   if (match[1]) {
@@ -187,7 +186,7 @@ function hashAssign (result, keys, value) {
   }
 
   const key = keys.shift();
-  const between = key.match(/^\[(.+?)\]$/u);
+  const between = key.match(/^\[(.+?)\]$/);
 
   if (key === '[]') {
     result = result || [];
@@ -277,11 +276,11 @@ function hashSerializer (result, key, value) {
  */
 function strSerialize (result, key, value) {
   // encode newlines as \r\n cause the html spec says so
-  value = value.replace(/(\r)?\n/gu, '\r\n');
+  value = value.replace(/(\r)?\n/g, '\r\n');
   value = encodeURIComponent(value);
 
   // spaces should be '+' rather than '%20'.
-  value = value.replace(/%20/gu, '+');
+  value = value.replace(/%20/g, '+');
   return result + (result ? '&' : '') + encodeURIComponent(key) + '=' + value;
 }
 

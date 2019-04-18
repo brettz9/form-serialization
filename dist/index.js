@@ -1,8 +1,8 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (factory((global.FormSerialize = {})));
-}(this, (function (exports) { 'use strict';
+  (global = global || self, factory(global.FormSerialize = {}));
+}(this, function (exports) { 'use strict';
 
   function _typeof(obj) {
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -76,8 +76,6 @@
     throw new TypeError("Invalid attempt to destructure non-iterable instance");
   }
 
-  /* eslint-disable unicorn/no-unsafe-regex */
-
   /**
    *
    * Get successful control from form and assemble into object
@@ -86,11 +84,11 @@
    */
   // types which indicate a submit action and are not successful controls
   // these will be ignored
-  var kRSubmitter = /^(?:[s\u017F]ubmit|button|image|re[s\u017F]et|file)$/i; // node names which could be successful controls
+  var kRSubmitter = /^(?:submit|button|image|reset|file)$/i; // node names which could be successful controls
 
-  var kRSuccessContrls = /^(?:input|[s\u017F]elect|textarea|[k\u212A]eygen)/i; // Matches bracket notation.
+  var kRSuccessContrls = /^(?:input|select|textarea|keygen)/i; // Matches bracket notation.
 
-  var brackets = /(\[(?:[\0-Z\\\^-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*\])/g;
+  var brackets = /(\[[^[\]]*\])/g;
   /**
    * @callback module:FormSerialization.Serializer
    * @param {PlainObject|string|*} result
@@ -113,6 +111,7 @@
 
   /**
    * Serializes form fields.
+   * @function module:FormSerialization.serialize
    * @param {HTMLFormElement} form MUST be an `HTMLFormElement`
    * @param {module:FormSerialization.Options} options is an optional argument
    *   to configure the serialization.
@@ -236,11 +235,10 @@
    * @returns {string[]}
    */
 
-
   function parseKeys(string) {
     var keys = [];
-    var prefix = /^((?:[\0-Z\\\^-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*)/;
-    var children = new RegExp(brackets, 'u');
+    var prefix = /^([^[\]]*)/;
+    var children = new RegExp(brackets);
     var match = prefix.exec(string);
 
     if (match[1]) {
@@ -268,7 +266,7 @@
     }
 
     var key = keys.shift();
-    var between = key.match(/^\[((?:[\0-\t\x0B\f\x0E-\u2027\u202A-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+?)\]$/);
+    var between = key.match(/^\[(.+?)\]$/);
 
     if (key === '[]') {
       result = result || [];
@@ -368,7 +366,7 @@
     return result + (result ? '&' : '') + encodeURIComponent(key) + '=' + value;
   }
   /**
-   *
+   * @function module:FormSerialization.deserialize
    * @param {HTMLFormElement} form
    * @param {PlainObject} hash
    * @returns {void}
@@ -438,9 +436,9 @@
     });
   }
 
-  exports.serialize = serialize;
   exports.deserialize = deserialize;
+  exports.serialize = serialize;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));

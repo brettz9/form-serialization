@@ -1,6 +1,7 @@
-# Keep `src` for now for module
+# Keep `src` for now
 
 test
 *.*
 !index.js
 !index-es.js
+!docs/**

@@ -70,8 +70,6 @@ function _nonIterableRest() {
   throw new TypeError("Invalid attempt to destructure non-iterable instance");
 }
 
-/* eslint-disable unicorn/no-unsafe-regex */
-
 /**
  *
  * Get successful control from form and assemble into object
@@ -80,11 +78,11 @@ function _nonIterableRest() {
  */
 // types which indicate a submit action and are not successful controls
 // these will be ignored
-var kRSubmitter = /^(?:[s\u017F]ubmit|button|image|re[s\u017F]et|file)$/i; // node names which could be successful controls
+var kRSubmitter = /^(?:submit|button|image|reset|file)$/i; // node names which could be successful controls
 
-var kRSuccessContrls = /^(?:input|[s\u017F]elect|textarea|[k\u212A]eygen)/i; // Matches bracket notation.
+var kRSuccessContrls = /^(?:input|select|textarea|keygen)/i; // Matches bracket notation.
 
-var brackets = /(\[(?:[\0-Z\\\^-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*\])/g;
+var brackets = /(\[[^[\]]*\])/g;
 /**
  * @callback module:FormSerialization.Serializer
  * @param {PlainObject|string|*} result
@@ -107,6 +105,7 @@ var brackets = /(\[(?:[\0-Z\\\^-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDF
 
 /**
  * Serializes form fields.
+ * @function module:FormSerialization.serialize
  * @param {HTMLFormElement} form MUST be an `HTMLFormElement`
  * @param {module:FormSerialization.Options} options is an optional argument
  *   to configure the serialization.
@@ -230,11 +229,10 @@ function serialize(form, options) {
  * @returns {string[]}
  */
 
-
 function parseKeys(string) {
   var keys = [];
-  var prefix = /^((?:[\0-Z\\\^-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*)/;
-  var children = new RegExp(brackets, 'u');
+  var prefix = /^([^[\]]*)/;
+  var children = new RegExp(brackets);
   var match = prefix.exec(string);
 
   if (match[1]) {
@@ -262,7 +260,7 @@ function hashAssign(result, keys, value) {
   }
 
   var key = keys.shift();
-  var between = key.match(/^\[((?:[\0-\t\x0B\f\x0E-\u2027\u202A-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+?)\]$/);
+  var between = key.match(/^\[(.+?)\]$/);
 
   if (key === '[]') {
     result = result || [];
@@ -362,7 +360,7 @@ function strSerialize(result, key, value) {
   return result + (result ? '&' : '') + encodeURIComponent(key) + '=' + value;
 }
 /**
- *
+ * @function module:FormSerialization.deserialize
  * @param {HTMLFormElement} form
  * @param {PlainObject} hash
  * @returns {void}
@@ -432,4 +430,4 @@ function deserialize(form, hash) {
   });
 }
 
-export { serialize, deserialize };
+export { deserialize, serialize };
