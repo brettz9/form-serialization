@@ -1,18 +1,33 @@
-# form-serialize [![Build Status](https://travis-ci.org/defunctzombie/form-serialize.png?branch=master)](https://travis-ci.org/defunctzombie/form-serialize)
+# form-serialization [![Build Status](https://travis-ci.org/brettz9/form-serialization.png?branch=master)](https://travis-ci.org/brettz9/form-serialization)
 
-serialize form fields to submit a form over ajax
+Serialize form fields. A fork of
+[form-serialize](https://github.com/defunctzombie/form-serialize).
 
-## install
+## Special features
+
+- Adds `deserialize`
+- Works in the browser
+- Offers ESM distribution as well as UMD
+
+## Use cases
+
+- Submit a form via `XMLHttpRequest`
+- Retain settings in local storage
+- Serialize to string for use within hash-based offlineable URLs
+- Serialize for use within modifying [history state](https://developer.mozilla.org/en-US/docs/Web/API/History_API#Adding_and_modifying_history_entries)
+
+## Install
 
 ```shell
-npm install form-serialize
+npm install form-serialization
 ```
 
-## use
+## Usage
 
-form-serialize supports two output formats, url encoded (default) or hash (js objects).
+`form-serialization` supports two output formats, URL encoding
+(the default) or a hash (JavaScript objects).
 
-Lets serialize the following html form:
+Lets serialize the following HTML form:
 ```html
 <form id="example-form">
 	<input type="text" name="foo" value="bar"/>
@@ -21,54 +36,60 @@ Lets serialize the following html form:
 ```
 
 ```js
-var serialize = require('form-serialize');
-var form = document.querySelector('#example-form');
+const serialize = require('form-serialization');
 
-var str = serialize(form);
+const form = document.querySelector('#example-form');
+
+const str = serialize(form);
 // str -> "foo=bar"
 
-var obj = serialize(form, { hash: true });
+const obj = serialize(form, {hash: true});
 // obj -> { foo: 'bar' }
 ```
 
-## api
+## API
 
 ### serialize(form \[, options])
 
-Returns a serialized form of a HTMLForm element. Output is determined by the serializer used. Default serializer is url-encoded.
+Returns a serialized form of a `HTMLFormElement`. Output is determined by
+the serializer used. The default serializer performs URL encoding.
 
 arg | type | desc
 :--- | :--- | :---
-form | HTMLForm | must be an HTMLForm element
+form | HTMLForm | must be an `HTMLFormElement`
 options | Object | optional options object
 
-#### options
+#### Options
 
 option | type | default | desc
 :--- | :--- | :---: | :---
-hash | boolean | false | if `true`, the hash serializer will be used for `serializer` option
-serializer | function | url-encoding | override the default serializer (hash or url-encoding)
-disabled | boolean | false | if `true`, disabled fields will also be serialized
-empty | boolean | false | if `true`, empty fields will also be serialized
+hash | boolean | false | If `true`, the hash serializer will be used for `serializer` option
+serializer | function | url-encoding | Override the default serializer (hash or url-encoding)
+disabled | boolean | false | If `true`, disabled fields will also be serialized
+empty | boolean | false | If `true`, empty fields will also be serialized
 
-### custom serializer
+### Custom serializer
 
 Serializers take 3 arguments: `result`, `key`, `value` and should return a newly updated result.
 
-See the example serializers in the index.js source file.
+See the example serializers in the `index.js` source file.
 
-## notes
+## Notes
 
-only [successful control](http://www.w3.org/TR/html401/interact/forms.html#h-17.13.2) form fields are serialized (with the exception of disabled fields if disabled option is set)
+Only [successful control](https://www.w3.org/TR/html401/interact/forms.html#h-17.13.2)
+form fields are serialized (with the exception of disabled fields if disabled option
+is set).
 
-multiselect fields with more than one value will result in an array of values in the `hash` output mode using the default hash serializer
+Multiselect fields with more than one value will result in an array of values
+in the `hash` output mode using the default hash serializer
 
-### explicit array fields
+### Explicit array fields
 
-Fields who's name ends with `[]` are **always** serialized as an array field in `hash` output mode using the default hash serializer.
+Fields who's name ends with `[]` are **always** serialized as an array
+field in `hash` output mode using the default hash serializer.
 The field name also gets the brackets removed from its name.
 
-This does not affect `url-encoding` mode output in any way.
+This does not affect the URL encoding mode output in any way.
 
 ```html
 <form id="example-form">
@@ -79,22 +100,26 @@ This does not affect `url-encoding` mode output in any way.
 ```
 
 ```js
-var serialize = require('form-serialize');
-var form = document.querySelector('#example-form');
+const serialize = require('form-serialization');
 
-var obj = serialize(form, { hash: true });
+const form = document.querySelector('#example-form');
+
+const obj = serialize(form, {hash: true});
 // obj -> { foo: ['bar'] }
 
-var str = serialize(form);
+const str = serialize(form);
 // str -> "foo[]=bar"
 
 ```
 
-### indexed arrays
+### Indexed arrays
 
-Adding numbers between brackets for the array notation above will result in a hash serialization with explicit ordering based on the index number regardless of element ordering.
+Adding numbers between brackets for the array notation above will result
+in a hash serialization with explicit ordering based on the index number
+regardless of element ordering.
 
-Like the "[explicit array fields](explicit-array-fields)" this does not affect url-encoding mode output in any way.
+Like the "[explicit array fields](explicit-array-fields)" this does not
+affect ULR encoding mode output in any way.
 
 ```html
 <form id="todos-form">
@@ -105,22 +130,25 @@ Like the "[explicit array fields](explicit-array-fields)" this does not affect u
 ```
 
 ```js
-var serialize = require('form-serialize');
-var form = document.querySelector('#todos-form');
+const serialize = require('form-serialization');
 
-var obj = serialize(form, { hash: true });
+const form = document.querySelector('#todos-form');
+
+const obj = serialize(form, {hash: true});
 // obj -> { todos: ['eggs', 'milk', 'flour'] }
 
-var str = serialize(form);
+const str = serialize(form);
 // str -> "todos[1]=milk&todos[0]=eggs&todos[2]=flour"
-
 ```
 
-### nested objects
+### Nested objects
 
-Similar to the indexed array notation, attribute names can be added by inserting a string value between brackets. The notation can be used to create deep objects and mixed with the array notation.
+Similar to the indexed array notation, attribute names can be added by
+inserting a string value between brackets. The notation can be used to
+create deep objects and mixed with the array notation.
 
-Like the "[explicit array fields](explicit-array-fields)" this does not affect url-encoding mode output.
+Like the "[explicit array fields](explicit-array-fields)" this does not
+affect URL encoding mode output.
 
 ```html
 <form id="nested-example">
@@ -130,18 +158,15 @@ Like the "[explicit array fields](explicit-array-fields)" this does not affect u
 ```
 
 ```js
-var serialize = require('form-serialize');
-var form = document.querySelector('#todos-form');
+const serialize = require('form-serialization');
 
-var obj = serialize(form, { hash: true });
+const form = document.querySelector('#todos-form');
+
+const obj = serialize(form, {hash: true});
 // obj -> { foo: { bar: { baz: 'qux' } }, norf: [ 'item 1' ] }
 
 ```
 
-## references
-
-This module is based on ideas from jQuery serialize and the Form.serialize method from the prototype library
-
-## license
+## License
 
 MIT

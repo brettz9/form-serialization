@@ -1,54 +1,71 @@
 {
-  "name": "form-serialize",
-  "version": "0.7.2",
-  "description": "serialize html forms",
+  "name": "form-serialization",
+  "version": "0.8.0",
+  "description": "Serialize and deserialize HTML forms",
   "main": "dist/index.js",
   "browser": "dist/index.js",
   "module": "dist/index-es.js",
   "directories": {
     "test": "test"
   },
-  "dependencies": {},
-  "devDependencies": {
-    "@babel/core": "^7.1.2",
-    "@babel/preset-env": "^7.1.0",
-    "domify": "~1.4.0",
-    "eslint": "5.8.0",
-    "eslint-config-standard": "12.0.0",
-    "eslint-plugin-compat": "2.6.2",
-    "eslint-plugin-import": "2.14.0",
-    "eslint-plugin-node": "8.0.0",
-    "eslint-plugin-promise": "4.0.1",
-    "eslint-plugin-standard": "4.0.0",
-    "rollup": "0.66.6",
-    "rollup-plugin-babel": "^4.0.3",
-    "zuul": "~3.12.0"
-  },
   "scripts": {
     "eslint": "eslint .",
     "rollup": "rollup -c",
-    "test": "npm run eslint && npm run rollup && zuul -- test/index-polyglot.js",
-    "test-local": "npm run eslint && npm run rollup && npm run zuul-local",
-    "zuul-local": "zuul --local 8081 -- test/index-polyglot.js"
+    "start": "static -p 8057",
+    "build-docs": "rm -rf docs/jsdoc/*;jsdoc --pedantic -c docs/jsdoc-config.js src",
+    "open-docs": "opn http://localhost:8057/docs/jsdoc/ && npm start",
+    "mocha": "mocha --ui mocha-qunit-ui --require @babel/register test/index.js",
+    "test": "npm run eslint && npm run rollup && npm run mocha"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/shtylman/form-serialize.git"
+    "url": "git://github.com/brettz9/form-serialization.git"
   },
   "keywords": [
     "form",
     "serialize"
   ],
-  "author": "Roman Shtylman <shtylman@gmail.com>",
+  "author": "Brett Zamir",
   "contributors": [
-    "Brett Zamir"
+    "Roman Shtylman <shtylman@gmail.com>"
   ],
   "license": "MIT",
   "engines": {
-      "node": "*"
+    "node": ">= 7.0.0"
   },
-  "homepage": "https://github.com/shtylman/form-serialize",
+  "homepage": "https://github.com/brettz9/form-serialization",
   "bugs": {
-    "url": "https://github.com/shtylman/form-serialize/issues"
+    "url": "https://github.com/brettz9/form-serialization/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "@babel/register": "^7.4.0",
+    "@mysticatea/eslint-plugin": "^9.0.1",
+    "browserslist": "^4.5.5",
+    "caniuse-lite": "^1.0.30000960",
+    "domify": "~1.4.0",
+    "eslint": "^5.16.0",
+    "eslint-config-ash-nazg": "^2.0.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-compat": "^3.1.1",
+    "eslint-plugin-eslint-comments": "^3.1.1",
+    "eslint-plugin-import": "^2.17.2",
+    "eslint-plugin-jsdoc": "^4.8.3",
+    "eslint-plugin-markdown": "^1.0.0",
+    "eslint-plugin-no-use-extend-native": "^0.4.0",
+    "eslint-plugin-node": "8.0.0",
+    "eslint-plugin-promise": "^4.1.1",
+    "eslint-plugin-standard": "4.0.0",
+    "eslint-plugin-unicorn": "^8.0.2",
+    "jsdoc": "^3.5.5",
+    "jsdom": "^14.0.0",
+    "mocha": "^6.1.3",
+    "mocha-qunit-ui": "^0.1.3",
+    "node-static": "^0.7.11",
+    "opn-cli": "^4.1.0",
+    "rollup": "0.66.6",
+    "rollup-plugin-babel": "^4.3.2"
   }
 }

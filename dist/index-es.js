@@ -70,30 +70,54 @@ function _nonIterableRest() {
   throw new TypeError("Invalid attempt to destructure non-iterable instance");
 }
 
-// get successful control from form and assemble into object
-// http://www.w3.org/TR/html401/interact/forms.html#h-17.13.2
+/* eslint-disable unicorn/no-unsafe-regex */
+
+/**
+ *
+ * Get successful control from form and assemble into object
+ * @see {@link http://www.w3.org/TR/html401/interact/forms.html#h-17.13.2}
+ * @module FormSerialization
+ */
 // types which indicate a submit action and are not successful controls
 // these will be ignored
-var kRSubmitter = /^(?:submit|button|image|reset|file)$/i; // node names which could be successful controls
+var kRSubmitter = /^(?:[s\u017F]ubmit|button|image|re[s\u017F]et|file)$/i; // node names which could be successful controls
 
-var kRSuccessContrls = /^(?:input|select|textarea|keygen)/i; // Matches bracket notation.
+var kRSuccessContrls = /^(?:input|[s\u017F]elect|textarea|[k\u212A]eygen)/i; // Matches bracket notation.
 
-var brackets = /(\[[^[\]]*\])/g; // serializes form fields
-// @param form MUST be an HTMLForm element
-// @param options is an optional argument to configure the serialization. Default output
-// with no options specified is a url encoded string
-//    - hash: [true | false] Configure the output type. If true, the output will
-//    be a js object.
-//    - serializer: [function] Optional serializer function to override the default one.
-//    The function takes 3 arguments (result, key, value) and should return new result
-//    hash and url encoded str serializers are provided with this module
-//    - disabled: [true | false]. If true serialize disabled fields.
-//    - empty: [true | false]. If true serialize empty fields
+var brackets = /(\[(?:[\0-Z\\\^-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*\])/g;
+/**
+ * @callback module:FormSerialization.Serializer
+ * @param {PlainObject|string|*} result
+ * @param {string} key
+ * @param {string} value
+ * @returns {PlainObject|string|*} New result
+*/
+
+/**
+ * @typedef {PlainObject} module:FormSerialization.Options
+ * @property {boolean} [hash] Configure the output type. If true, the
+ *  output will be a JavaScript object.
+ * @property {module:FormSerialization.Serializer} [serializer] Optional
+ *   serializer function to override the default one. Otherwise, hash
+ *   and URL-encoded string serializers are provided with this module,
+ *   depending on the setting of `hash`.
+ * @property {boolean} [disabled] If true serialize disabled fields.
+ * @property {boolean} [empty] If true serialize empty fields
+*/
+
+/**
+ * Serializes form fields.
+ * @param {HTMLFormElement} form MUST be an `HTMLFormElement`
+ * @param {module:FormSerialization.Options} options is an optional argument
+ *   to configure the serialization.
+ * @returns {*|string|PlainObject} Default output with no options specified is
+ *   a url encoded string
+ */
 
 function serialize(form, options) {
   if (_typeof(options) !== 'object') {
     options = {
-      hash: !!options
+      hash: Boolean(options)
     };
   } else if (options.hash === undefined) {
     options.hash = true;
@@ -119,8 +143,9 @@ function serialize(form, options) {
         type = element.type,
         name = element.name,
         checked = element.checked;
-    var value = element.value; // We can't just use element.value for checkboxes cause some browsers lie to us;
-    // they say "on" for value when the box isn't checked
+    var value = element.value; // We can't just use element.value for checkboxes cause some
+    //   browsers lie to us; they say "on" for value when the
+    //   box isn't checked
 
     if ((type === 'checkbox' || type === 'radio') && !checked) {
       value = undefined;
@@ -199,11 +224,17 @@ function serialize(form, options) {
 
   return result;
 }
+/**
+ *
+ * @param {string} string
+ * @returns {string[]}
+ */
+
 
 function parseKeys(string) {
   var keys = [];
-  var prefix = /^([^[\]]*)/;
-  var children = new RegExp(brackets);
+  var prefix = /^((?:[\0-Z\\\^-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])*)/;
+  var children = new RegExp(brackets, 'u');
   var match = prefix.exec(string);
 
   if (match[1]) {
@@ -216,6 +247,14 @@ function parseKeys(string) {
 
   return keys;
 }
+/**
+ *
+ * @param {PlainObject|Array} result
+ * @param {string[]} keys
+ * @param {string} value
+ * @returns {string|PlainObject|Array}
+ */
+
 
 function hashAssign(result, keys, value) {
   if (keys.length === 0) {
@@ -223,7 +262,7 @@ function hashAssign(result, keys, value) {
   }
 
   var key = keys.shift();
-  var between = key.match(/^\[(.+?)\]$/);
+  var between = key.match(/^\[((?:[\0-\t\x0B\f\x0E-\u2027\u202A-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])+?)\]$/);
 
   if (key === '[]') {
     result = result || [];
@@ -252,7 +291,7 @@ function hashAssign(result, keys, value) {
     // better than parseInt because it doesn't truncate away trailing
     // letters and actually fails if whole thing is not a number
 
-    var index = +string; // If the characters between the brackets is not a number it is an
+    var index = Number(string); // If the characters between the brackets is not a number it is an
     // attribute name and can be assigned directly.
 
     if (isNaN(index)) {
@@ -265,7 +304,14 @@ function hashAssign(result, keys, value) {
   }
 
   return result;
-} // Object/hash encoding serializer.
+}
+/**
+ * Object/hash encoding serializer.
+ * @param {PlainObject} result
+ * @param {string} key
+ * @param {string} value
+ * @returns {PlainObject}
+ */
 
 
 function hashSerializer(result, key, value) {
@@ -297,7 +343,14 @@ function hashSerializer(result, key, value) {
   }
 
   return result;
-} // urlform encoding serializer
+}
+/**
+ * URL form encoding serializer.
+ * @param {string} result
+ * @param {string} key
+ * @param {string} value
+ * @returns {string} New result
+ */
 
 
 function strSerialize(result, key, value) {
@@ -308,6 +361,13 @@ function strSerialize(result, key, value) {
   value = value.replace(/%20/g, '+');
   return result + (result ? '&' : '') + encodeURIComponent(key) + '=' + value;
 }
+/**
+ *
+ * @param {HTMLFormElement} form
+ * @param {PlainObject} hash
+ * @returns {void}
+ */
+
 
 function deserialize(form, hash) {
   // input(text|radio|checkbox)|select(multiple)|textarea|keygen
@@ -319,11 +379,20 @@ function deserialize(form, hash) {
     var control = form[name];
 
     if (!form[name]) {
-      control = form[name + '[]']; // We want this for RadioNodeList so setting value auto-disables other boxes
+      // We want this for `RadioNodeList` so setting value
+      //  auto-disables other boxes
+      control = form[name + '[]'];
+
+      if (!control || _typeof(control) !== 'object') {
+        // eslint-disable-next-line no-console
+        console.log('Bad control name to form-serialize:', name);
+        return;
+      }
 
       if (!('length' in control)) {
         // The latter assignment only gets single
-        //    elements, so if not a RadioNodeList, we get all values here
+        //  elements, so if not a RadioNodeList, we get
+        //  all values here
         control = form.querySelectorAll("[name=\"".concat(name, "[]\"]"));
       }
     }
