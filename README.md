@@ -6,7 +6,7 @@ Serialize form fields. A fork of
 ## Special features
 
 - Adds `deserialize`
-- Works in the browser
+- Offers a pre-made browser bundle
 - Offers ESM distribution as well as UMD
 
 ## Use cases
