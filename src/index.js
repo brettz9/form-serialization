@@ -294,25 +294,43 @@ export function deserialize (form, hash) {
   // input(text|radio|checkbox)|select(multiple)|textarea|keygen
   Object.entries(hash).forEach(([name, value]) => {
     let control = form[name];
-    if (!form[name]) {
-      // We want this for `RadioNodeList` so setting value
-      //  auto-disables other boxes
-      control = form[name + '[]'];
-      if (!control || typeof control !== 'object') {
-        // eslint-disable-next-line no-console
-        console.log('Bad control name to form-serialize:', name);
-        return;
-      }
-      if (!('length' in control)) {
-        // The latter assignment only gets single
-        //  elements, so if not a RadioNodeList, we get
-        //  all values here
-        control = form.querySelectorAll(`[name="${name}[]"]`);
+    let hasBrackets = false;
+    if (!control) { // Try again for jsdom
+      control = form.querySelector(`[name="${name}"]`);
+      if (!control) {
+        // We want this for `RadioNodeList` so setting value
+        //  auto-disables other boxes
+        control = form[name + '[]'];
+        if (!control || typeof control !== 'object' || !('length' in control)) {
+          // The latter query would only get a single
+          //  element, so if not a `RadioNodeList`, we get
+          //  all values here
+          control = form.querySelectorAll(`[name="${name}[]"]`);
+          if (!control) {
+            throw new Error(`Name not found ${name}`);
+          }
+        }
+        hasBrackets = true;
       }
     }
     const {type} = control;
     if (type === 'checkbox') {
       control.checked = value !== '';
+    }
+    if (type === 'radio' || (control[0] && control[0].type === 'radio')) {
+      [...form.querySelectorAll(
+        `[name="${name + (hasBrackets ? '[]' : '')}"]`
+      )].forEach((radio) => {
+        radio.checked = value === radio.value;
+      });
+    }
+    if (control[0] && control[0].type === 'select-multiple') {
+      [...control[0].options].forEach((o) => {
+        if (value.includes(o.value)) {
+          o.selected = true;
+        }
+      });
+      return;
     }
     if (Array.isArray(value)) {
       if (type === 'select-multiple') {
@@ -328,6 +346,14 @@ export function deserialize (form, hash) {
         if (c.type === 'checkbox') {
           const isMatch = c.value === v || v === 'on';
           c.checked = isMatch;
+          return;
+        }
+        if (c.type === 'select-multiple') {
+          [...c.options].forEach((o) => {
+            if (v === o.value) {
+              o.selected = true;
+            }
+          });
           return;
         }
         c.value = v;

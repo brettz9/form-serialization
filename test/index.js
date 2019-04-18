@@ -3,17 +3,15 @@
 
 import {serialize, deserialize} from '../src/index.js';
 
+// import assert from 'assert';
 const assert = require('assert');
 const {JSDOM} = require('jsdom');
 
-const {document} = (new JSDOM()).window; // eslint-disable-line no-shadow
-// Needed by `domify` (or could pass in as its second argument)
-global.document = document;
+const {DOMParser} = (new JSDOM()).window; // eslint-disable-line no-shadow
 
-// import assert from 'assert';
-// import domify from 'domify';
-
-const domify = require('domify');
+const domify = (s) => {
+  return new DOMParser().parseFromString(s, 'text/html').body.firstElementChild;
+};
 
 function hashCheck (form, exp) {
   assert.deepStrictEqual(serialize(form, {hash: true}), exp);
@@ -546,8 +544,8 @@ test('deserialize', function () {
   <input type="text" name="textBox" />
   <input type="checkbox" name="checkBox1" />
   <input type="checkbox" name="checkBox2" />
-  <input type="radio" name="radio1" value="a" />
-  <input type="radio" name="radio1" value="b" />
+  <input type="radio" id="r1" name="radio1" value="a" />
+  <input type="radio" id="r2" name="radio1" value="b" />
   <textarea name="textarea1"></textarea>
   <select name="select1">
     <option value="opt1">Option 1</option>
@@ -562,6 +560,7 @@ test('deserialize', function () {
   </select>
 </form>
 `);
+
   const hash = {
     textBox: 'xyz',
     checkBox1: 'on',
@@ -570,18 +569,25 @@ test('deserialize', function () {
     select1: 'opt2',
     selectMultiple1: ['opt3', 'Option 4']
   };
+  function $ (sel) {
+    return form.querySelector(sel);
+  }
   // console.log(serialize(form, {hash: true, empty: true}));
   deserialize(form, hash);
-  assert.deepStrictEqual(form.textBox.value, 'xyz');
-  assert.deepStrictEqual(form.checkBox1.checked, true);
-  assert.deepStrictEqual(form.checkBox2.checked, false);
-  assert.deepStrictEqual(form.radio1.value, 'b');
-  assert.deepStrictEqual(form.textarea1.value, 'some text');
-  assert.deepStrictEqual(form.select1.value, 'opt2');
+  // We can't use the names on `form` per https://github.com/jsdom/jsdom/issues/1570
+  assert.deepStrictEqual($('*[name=textBox]').value, 'xyz');
+  assert.deepStrictEqual($('*[name=checkBox1]').checked, true);
+  assert.deepStrictEqual($('*[name=checkBox2]').checked, false);
+  assert.deepStrictEqual($('#r1').checked, false);
+  assert.deepStrictEqual($('#r2').checked, true);
+  assert.deepStrictEqual($('*[name=textarea1]').value, 'some text');
+  assert.deepStrictEqual($('*[name=select1]').value, 'opt2');
   assert.deepStrictEqual(
-    [...form.selectMultiple1.selectedOptions].map(function (o) {
-      return o.value;
-    }), ['opt3', 'Option 4']
+    [...$('*[name=selectMultiple1]').selectedOptions].map(
+      function (o) {
+        return o.value;
+      }
+    ), ['opt3', 'Option 4']
   );
   // assert.deepStrictEqual(serialize(form, {hash: true}), hash);
 });
@@ -619,6 +625,7 @@ test('deserialize arrays', function () {
   }
   // console.log(serialize(form, {hash: true, empty: true}));
   deserialize(form, hash);
+  // We can't use the names on `form` per https://github.com/jsdom/jsdom/issues/1570
   // assert.deepStrictEqual(form.arr1, 'xyz');
   assert.deepStrictEqual($('#textBox').value, 'text1');
   assert.deepStrictEqual($('#checkBox1').checked, false);

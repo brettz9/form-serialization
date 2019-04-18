@@ -1,3 +1,13 @@
+# 0.10.0 (2019-04-18)
+
+- Fix: For jsdom, workaround
+    <https://github.com/jsdom/jsdom/issues/1570> and use `querySelector`
+    if not found by name
+- Fix: For jsdom at least, properly set radio checked and multiple selected status
+- Throw specific error if control not found of a given name
+- Testing: Remove `domify` in favor of just jsdom; workaround
+    <https://github.com/jsdom/jsdom/issues/1570>
+
 # 0.9.0 (2019-04-18)
 
 - Enhancement: Bundle jsdoc in npm for sake of npm CDNs (like

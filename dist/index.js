@@ -381,23 +381,29 @@
           value = _ref4[1];
 
       var control = form[name];
+      var hasBrackets = false;
 
-      if (!form[name]) {
-        // We want this for `RadioNodeList` so setting value
-        //  auto-disables other boxes
-        control = form[name + '[]'];
+      if (!control) {
+        // Try again for jsdom
+        control = form.querySelector("[name=\"".concat(name, "\"]"));
 
-        if (!control || _typeof(control) !== 'object') {
-          // eslint-disable-next-line no-console
-          console.log('Bad control name to form-serialize:', name);
-          return;
-        }
+        if (!control) {
+          // We want this for `RadioNodeList` so setting value
+          //  auto-disables other boxes
+          control = form[name + '[]'];
 
-        if (!('length' in control)) {
-          // The latter assignment only gets single
-          //  elements, so if not a RadioNodeList, we get
-          //  all values here
-          control = form.querySelectorAll("[name=\"".concat(name, "[]\"]"));
+          if (!control || _typeof(control) !== 'object' || !('length' in control)) {
+            // The latter query would only get a single
+            //  element, so if not a `RadioNodeList`, we get
+            //  all values here
+            control = form.querySelectorAll("[name=\"".concat(name, "[]\"]"));
+
+            if (!control) {
+              throw new Error("Name not found ".concat(name));
+            }
+          }
+
+          hasBrackets = true;
         }
       }
 
@@ -406,6 +412,22 @@
 
       if (type === 'checkbox') {
         control.checked = value !== '';
+      }
+
+      if (type === 'radio' || control[0] && control[0].type === 'radio') {
+        _toConsumableArray(form.querySelectorAll("[name=\"".concat(name + (hasBrackets ? '[]' : ''), "\"]"))).forEach(function (radio) {
+          radio.checked = value === radio.value;
+        });
+      }
+
+      if (control[0] && control[0].type === 'select-multiple') {
+        _toConsumableArray(control[0].options).forEach(function (o) {
+          if (value.includes(o.value)) {
+            o.selected = true;
+          }
+        });
+
+        return;
       }
 
       if (Array.isArray(value)) {
@@ -425,6 +447,16 @@
           if (c.type === 'checkbox') {
             var isMatch = c.value === v || v === 'on';
             c.checked = isMatch;
+            return;
+          }
+
+          if (c.type === 'select-multiple') {
+            _toConsumableArray(c.options).forEach(function (o) {
+              if (v === o.value) {
+                o.selected = true;
+              }
+            });
+
             return;
           }
 
