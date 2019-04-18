@@ -8,7 +8,7 @@ Serialize form fields. A fork of
 - Adds `deserialize`
 - Offers a pre-made browser bundle
 - Offers ESM distribution as well as UMD
-- Offers [JSDoc](./docs/jsdoc/index.html)
+- Offers [JSDoc](https://unpkg.com/form-serialization/docs/jsdoc/module-FormSerialization.html)
 
 ## Use cases
 
