@@ -18,10 +18,10 @@ module.exports = {
   },
   templates: {
     cleverLinks: true,
-    monospaceLinks: false /* ,
+    monospaceLinks: false,
     default: {
       layoutFile: 'docs/layout.tmpl'
-    } */
+    }
   },
   opts: {
     recurse: true,
