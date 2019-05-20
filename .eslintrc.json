@@ -9,8 +9,12 @@
           "parserOptions": {
              "sourceType": "script"
           },
+          "globals": {
+            "module": "readonly"
+          },
           "rules": {
-              "import/no-commonjs": 0
+              "import/no-commonjs": 0,
+              "strict": ["error", "global"]
           }
       },
       {
