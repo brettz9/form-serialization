@@ -17,10 +17,10 @@ const brackets = /(\[[^[\]]*\])/g;
 
 /**
  * @callback module:FormSerialization.Serializer
- * @param {PlainObject|string|*} result
+ * @param {PlainObject|string|any} result
  * @param {string} key
  * @param {string} value
- * @returns {PlainObject|string|*} New result
+ * @returns {PlainObject|string|any} New result
 */
 
 /**
@@ -41,7 +41,7 @@ const brackets = /(\[[^[\]]*\])/g;
  * @param {HTMLFormElement} form MUST be an `HTMLFormElement`
  * @param {module:FormSerialization.Options} options is an optional argument
  *   to configure the serialization.
- * @returns {*|string|PlainObject} Default output with no options specified is
+ * @returns {any|string|PlainObject} Default output with no options specified is
  *   a url encoded string
  */
 export function serialize (form, options) {
@@ -106,8 +106,6 @@ export function serialize (form, options) {
 
     // multi select boxes
     if (type === 'select-multiple') {
-      value = [];
-
       let isSelectedOptions = false;
       [...element.options].forEach((option) => {
         const allowedEmpty = options.empty && !option.value;
@@ -174,11 +172,15 @@ function parseKeys (string) {
 }
 
 /**
+* @typedef {GenericArray} ResultArray
+*/
+
+/**
  *
- * @param {PlainObject|Array} result
+ * @param {PlainObject|ResultArray} result
  * @param {string[]} keys
  * @param {string} value
- * @returns {string|PlainObject|Array}
+ * @returns {string|PlainObject|ResultArray}
  */
 function hashAssign (result, keys, value) {
   if (keys.length === 0) {

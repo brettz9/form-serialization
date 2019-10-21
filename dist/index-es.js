@@ -37,6 +37,10 @@ function _iterableToArray(iter) {
 }
 
 function _iterableToArrayLimit(arr, i) {
+  if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
+    return;
+  }
+
   var _arr = [];
   var _n = true;
   var _d = false;
@@ -85,10 +89,10 @@ var kRSuccessContrls = /^(?:input|select|textarea|keygen)/i; // Matches bracket 
 var brackets = /(\[[^[\]]*\])/g;
 /**
  * @callback module:FormSerialization.Serializer
- * @param {PlainObject|string|*} result
+ * @param {PlainObject|string|any} result
  * @param {string} key
  * @param {string} value
- * @returns {PlainObject|string|*} New result
+ * @returns {PlainObject|string|any} New result
 */
 
 /**
@@ -109,7 +113,7 @@ var brackets = /(\[[^[\]]*\])/g;
  * @param {HTMLFormElement} form MUST be an `HTMLFormElement`
  * @param {module:FormSerialization.Options} options is an optional argument
  *   to configure the serialization.
- * @returns {*|string|PlainObject} Default output with no options specified is
+ * @returns {any|string|PlainObject} Default output with no options specified is
  *   a url encoded string
  */
 
@@ -176,7 +180,6 @@ function serialize(form, options) {
 
 
     if (type === 'select-multiple') {
-      value = [];
       var isSelectedOptions = false;
 
       _toConsumableArray(element.options).forEach(function (option) {
@@ -246,11 +249,15 @@ function parseKeys(string) {
   return keys;
 }
 /**
+* @typedef {GenericArray} ResultArray
+*/
+
+/**
  *
- * @param {PlainObject|Array} result
+ * @param {PlainObject|ResultArray} result
  * @param {string[]} keys
  * @param {string} value
- * @returns {string|PlainObject|Array}
+ * @returns {string|PlainObject|ResultArray}
  */
 
 

@@ -1,5 +1,5 @@
 /* eslint-env node, mocha */
-/* eslint-disable import/no-commonjs, require-jsdoc */
+/* eslint-disable import/no-commonjs, jsdoc/require-jsdoc */
 /* globals require */
 
 import {serialize, deserialize} from '../src/index.js';

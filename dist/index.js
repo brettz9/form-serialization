@@ -43,6 +43,10 @@
   }
 
   function _iterableToArrayLimit(arr, i) {
+    if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
+      return;
+    }
+
     var _arr = [];
     var _n = true;
     var _d = false;
@@ -91,10 +95,10 @@
   var brackets = /(\[[^[\]]*\])/g;
   /**
    * @callback module:FormSerialization.Serializer
-   * @param {PlainObject|string|*} result
+   * @param {PlainObject|string|any} result
    * @param {string} key
    * @param {string} value
-   * @returns {PlainObject|string|*} New result
+   * @returns {PlainObject|string|any} New result
   */
 
   /**
@@ -115,7 +119,7 @@
    * @param {HTMLFormElement} form MUST be an `HTMLFormElement`
    * @param {module:FormSerialization.Options} options is an optional argument
    *   to configure the serialization.
-   * @returns {*|string|PlainObject} Default output with no options specified is
+   * @returns {any|string|PlainObject} Default output with no options specified is
    *   a url encoded string
    */
 
@@ -182,7 +186,6 @@
 
 
       if (type === 'select-multiple') {
-        value = [];
         var isSelectedOptions = false;
 
         _toConsumableArray(element.options).forEach(function (option) {
@@ -252,11 +255,15 @@
     return keys;
   }
   /**
+  * @typedef {GenericArray} ResultArray
+  */
+
+  /**
    *
-   * @param {PlainObject|Array} result
+   * @param {PlainObject|ResultArray} result
    * @param {string[]} keys
    * @param {string} value
-   * @returns {string|PlainObject|Array}
+   * @returns {string|PlainObject|ResultArray}
    */
 
 

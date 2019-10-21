@@ -1,9 +1,13 @@
 import babel from 'rollup-plugin-babel';
 
 /**
+ * @external RollupObject
+ */
+
+/**
  *
  * @param {"es"|"umd"} format
- * @returns {Array}
+ * @returns {external:RollupObject[]}
  */
 function getConfig ({format}) {
   return [{

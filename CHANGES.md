@@ -2,8 +2,9 @@
 
 ## ?
 
-- Linting: Fix per new requirements
-- npm: Update opn-cli -> open-cli, devDeps, add peerDep of devDep
+- Linting (ESLint): Update per new config; apply to any HTML/Markdown JS
+- Linting (LGTM): Remove unused variable; add `lgtm.yml`
+- npm: Update `opn-cli` -> `open-cli`, devDeps, add peerDep of devDep
 
 ## 0.10.0 (2019-04-18)
 
