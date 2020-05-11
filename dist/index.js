@@ -2,9 +2,11 @@
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
   (global = global || self, factory(global.FormSerialize = {}));
-}(this, function (exports) { 'use strict';
+}(this, (function (exports) { 'use strict';
 
   function _typeof(obj) {
+    "@babel/helpers - typeof";
+
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
       _typeof = function (obj) {
         return typeof obj;
@@ -19,19 +21,15 @@
   }
 
   function _slicedToArray(arr, i) {
-    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
+    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
   }
 
   function _toConsumableArray(arr) {
-    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
+    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
   }
 
   function _arrayWithoutHoles(arr) {
-    if (Array.isArray(arr)) {
-      for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
-
-      return arr2;
-    }
+    if (Array.isArray(arr)) return _arrayLikeToArray(arr);
   }
 
   function _arrayWithHoles(arr) {
@@ -39,14 +37,11 @@
   }
 
   function _iterableToArray(iter) {
-    if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
+    if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
   }
 
   function _iterableToArrayLimit(arr, i) {
-    if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
-      return;
-    }
-
+    if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
     var _arr = [];
     var _n = true;
     var _d = false;
@@ -72,17 +67,34 @@
     return _arr;
   }
 
+  function _unsupportedIterableToArray(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(o);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+  }
+
+  function _arrayLikeToArray(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+
+    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+    return arr2;
+  }
+
   function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance");
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
   function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance");
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
   /**
    *
-   * Get successful control from form and assemble into object
+   * Get successful control from form and assemble into object.
    * @see {@link http://www.w3.org/TR/html401/interact/forms.html#h-17.13.2}
    * @module FormSerialization
    */
@@ -92,7 +104,7 @@
 
   var kRSuccessContrls = /^(?:input|select|textarea|keygen)/i; // Matches bracket notation.
 
-  var brackets = /(\[[^[\]]*\])/g;
+  var brackets = /(\[[^[\]]*])/g;
   /**
    * @callback module:FormSerialization.Serializer
    * @param {PlainObject|string|any} result
@@ -199,7 +211,7 @@
             // might be missing the trailing bracket pair. Both names
             // "foo" and "foo[]" should be arrays.
 
-            if (options.hash && key.slice(key.length - 2) !== '[]') {
+            if (options.hash && key.slice(-2) !== '[]') {
               result = serializer(result, key + '[]', option.value);
             } else {
               result = serializer(result, key, option.value);
@@ -273,7 +285,7 @@
     }
 
     var key = keys.shift();
-    var between = key.match(/^\[(.+?)\]$/);
+    var between = key.match(/^\[(.+?)]$/);
 
     if (key === '[]') {
       result = result || [];
@@ -304,6 +316,8 @@
 
       var index = Number(string); // If the characters between the brackets is not a number it is an
       // attribute name and can be assigned directly.
+      // Switching to Number.isNaN would require a polyfill for IE11
+      // eslint-disable-next-line unicorn/prefer-number-properties
 
       if (isNaN(index)) {
         result = result || {};
@@ -388,7 +402,7 @@
           value = _ref4[1];
 
       var control = form[name];
-      var hasBrackets = false;
+      var hasBrackets = false; // istanbul ignore else
 
       if (!control) {
         // Try again for jsdom
@@ -397,7 +411,7 @@
         if (!control) {
           // We want this for `RadioNodeList` so setting value
           //  auto-disables other boxes
-          control = form[name + '[]'];
+          control = form[name + '[]']; // istanbul ignore next
 
           if (!control || _typeof(control) !== 'object' || !('length' in control)) {
             // The latter query would only get a single
@@ -405,7 +419,7 @@
             //  all values here
             control = form.querySelectorAll("[name=\"".concat(name, "[]\"]"));
 
-            if (!control) {
+            if (!control.length) {
               throw new Error("Name not found ".concat(name));
             }
           }
@@ -438,6 +452,7 @@
       }
 
       if (Array.isArray(value)) {
+        // options on a multiple select
         if (type === 'select-multiple') {
           _toConsumableArray(control.options).forEach(function (o) {
             if (value.includes(o.value)) {
@@ -459,7 +474,7 @@
 
           if (c.type === 'select-multiple') {
             _toConsumableArray(c.options).forEach(function (o) {
-              if (v === o.value) {
+              if (v.includes(o.value)) {
                 o.selected = true;
               }
             });
@@ -480,4 +495,4 @@
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
-}));
+})));

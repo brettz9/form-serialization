@@ -1,4 +1,4 @@
-import babel from 'rollup-plugin-babel';
+import babel from '@rollup/plugin-babel';
 
 /**
  * @external RollupObject
@@ -18,7 +18,9 @@ function getConfig ({format}) {
       name: 'FormSerialize'
     },
     plugins: [
-      babel()
+      babel({
+        babelHelpers: 'bundled'
+      })
     ]
   }];
 }

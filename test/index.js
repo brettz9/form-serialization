@@ -614,12 +614,20 @@ test('deserialize arrays', function () {
     <option value="opt3">Option 3</option>
     <option>Option 4</option>
   </select>
+  <textarea name="arr4[]" id="textarea2">initial4</textarea>
+  <select name="arr4[]" multiple="multiple" id="selectMultiple2">
+    <option value="opt1">Option 1</option>
+    <option value="opt2">Option 2</option>
+    <option value="opt3">Option 3</option>
+    <option>Option 4</option>
+  </select>
 </form>
 `);
   const hash = {
     arr1: ['text1', '', 'on', 'Text 2', 'opt2'],
     arr2: 'b',
-    arr3: ['opt1', 'opt3']
+    arr3: ['opt1', 'opt3'],
+    arr4: ['newValue1', ['Option 4', 'opt1']]
   };
   function $ (sel) {
     return form.querySelector(sel);
@@ -643,4 +651,29 @@ test('deserialize arrays', function () {
     ),
     ['opt1', 'opt3']
   );
+  assert.deepStrictEqual($('#textarea2').value, 'newValue1');
+  assert.deepStrictEqual(
+    [...$('#selectMultiple2').selectedOptions].map(
+      function (o) {
+        return o.value;
+      }
+    ),
+    ['opt1', 'Option 4']
+  );
+});
+
+test('deserialize (erring)', function () {
+  // We don't include `keygen` as on way out
+  const form = domify(`
+<form>
+  <input type="text" name="textBox" />
+  <input type="checkbox" name="checkBox1" />
+  <input type="checkbox" name="checkBox2" />
+</form>
+  `);
+  assert.throws(() => {
+    deserialize(form, {
+      badName: "won't work"
+    });
+  }, Error, /Name not found/);
 });

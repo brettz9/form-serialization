@@ -1,6 +1,6 @@
 /**
  *
- * Get successful control from form and assemble into object
+ * Get successful control from form and assemble into object.
  * @see {@link http://www.w3.org/TR/html401/interact/forms.html#h-17.13.2}
  * @module FormSerialization
  */
@@ -13,7 +13,7 @@ const kRSubmitter = /^(?:submit|button|image|reset|file)$/i;
 const kRSuccessContrls = /^(?:input|select|textarea|keygen)/i;
 
 // Matches bracket notation.
-const brackets = /(\[[^[\]]*\])/g;
+const brackets = /(\[[^[\]]*])/g;
 
 /**
  * @callback module:FormSerialization.Serializer
@@ -118,7 +118,7 @@ export function serialize (form, options) {
           // context. Here the name attribute on the select element
           // might be missing the trailing bracket pair. Both names
           // "foo" and "foo[]" should be arrays.
-          if (options.hash && key.slice(key.length - 2) !== '[]') {
+          if (options.hash && key.slice(-2) !== '[]') {
             result = serializer(result, key + '[]', option.value);
           } else {
             result = serializer(result, key, option.value);
@@ -188,7 +188,7 @@ function hashAssign (result, keys, value) {
   }
 
   const key = keys.shift();
-  const between = key.match(/^\[(.+?)\]$/);
+  const between = key.match(/^\[(.+?)]$/);
 
   if (key === '[]') {
     result = result || [];
@@ -219,6 +219,8 @@ function hashAssign (result, keys, value) {
 
     // If the characters between the brackets is not a number it is an
     // attribute name and can be assigned directly.
+    // Switching to Number.isNaN would require a polyfill for IE11
+    // eslint-disable-next-line unicorn/prefer-number-properties
     if (isNaN(index)) {
       result = result || {};
       result[string] = hashAssign(result[string], keys, value);
@@ -297,18 +299,20 @@ export function deserialize (form, hash) {
   Object.entries(hash).forEach(([name, value]) => {
     let control = form[name];
     let hasBrackets = false;
+    // istanbul ignore else
     if (!control) { // Try again for jsdom
       control = form.querySelector(`[name="${name}"]`);
       if (!control) {
         // We want this for `RadioNodeList` so setting value
         //  auto-disables other boxes
         control = form[name + '[]'];
+        // istanbul ignore next
         if (!control || typeof control !== 'object' || !('length' in control)) {
           // The latter query would only get a single
           //  element, so if not a `RadioNodeList`, we get
           //  all values here
           control = form.querySelectorAll(`[name="${name}[]"]`);
-          if (!control) {
+          if (!control.length) {
             throw new Error(`Name not found ${name}`);
           }
         }
@@ -335,6 +339,7 @@ export function deserialize (form, hash) {
       return;
     }
     if (Array.isArray(value)) {
+      // options on a multiple select
       if (type === 'select-multiple') {
         [...control.options].forEach((o) => {
           if (value.includes(o.value)) {
@@ -352,7 +357,7 @@ export function deserialize (form, hash) {
         }
         if (c.type === 'select-multiple') {
           [...c.options].forEach((o) => {
-            if (v === o.value) {
+            if (v.includes(o.value)) {
               o.selected = true;
             }
           });

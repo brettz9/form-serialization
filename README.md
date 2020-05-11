@@ -1,5 +1,9 @@
 # form-serialization [![Build Status](https://travis-ci.org/brettz9/form-serialization.png?branch=master)](https://travis-ci.org/brettz9/form-serialization)
 
+**Note: You may be able to get the functionality you need from using
+[`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
+(for which there are also polyfills for the browser or Node).**
+
 Serialize form fields. A fork of
 [form-serialize](https://github.com/defunctzombie/form-serialize).
 

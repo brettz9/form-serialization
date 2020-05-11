@@ -1,9 +1,20 @@
 # CHANGES for form-serialization
 
-## ?
+## 0.11.0 (2020-05-11)
 
+- Fix: Throw if control is missing
+- Fix: Expect array for inner multiple select
+- Docs: Add note re: `FormData`
+- Linting (ESLint): As per latest ash-nazg
 - Linting (ESLint): Update per new config; apply to any HTML/Markdown JS
 - Linting (LGTM): Remove unused variable; add `lgtm.yml`
+- Testing: Add nyc for coverage
+- Testing: Check bad name and multiple select that is part of array,
+    bringing to 100% coverage
+- Build: Use "json" extension for RC
+- npm: Update `rollup-plugin-babel` to `@rollup/plugin-babel`
+    and make explicit `babelHelpers` value of `bundled`
+- npm: Update devDeps and add peer dep. no-unsanitized
 - npm: Update `opn-cli` -> `open-cli`, devDeps, add peerDep of devDep
 
 ## 0.10.0 (2019-04-18)
